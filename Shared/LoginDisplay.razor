@@ -1,0 +1,32 @@
+﻿<AuthorizeView>
+    <Authorized>
+        @{
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            string krestniJmeno = "";
+            string prijmeni = "";
+            if (user.Identity.IsAuthenticated)
+            {
+                string userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (int.TryParse(userId, out int userIdInt))
+                {
+                    var osoba = await UcitelService.GetKrestniJmenoAndPrijmeni(userIdInt);
+                    krestniJmeno = osoba.KrestniJmeno;
+                    prijmeni = osoba.Prijmeni;
+                }
+                else
+                {
+                    Console.WriteLine("Chyba při převodu identifikátoru uživatele na int.");
+                }
+            }
+        }
+        <a href="Identity/Account/Manage">Vítejte, @krestniJmeno @prijmeni!</a>
+        <form method="post" action="Identity/Account/LogOut">
+            <button type="submit" class="nav-link btn btn-link">Log out</button>
+        </form>
+    </Authorized>
+    <NotAuthorized>
+        <a href="Identity/Account/Register">Register</a>
+        <a href="Identity/Account/Login">Log in</a>
+    </NotAuthorized>
+</AuthorizeView>
